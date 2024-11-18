@@ -1,10 +1,8 @@
 import Product from "../models/products.model.js";
-import Validations from "../validations/products.validation.js";
 import Response from "../utils/response.utils.js";
 import statusCode from "../utils/statusCode.utils.js";
 
 import "express-async-errors";
-
 
 /*
   FILTER FORMAT:
@@ -14,18 +12,15 @@ import "express-async-errors";
 */
 export async function getAllProducts(req, res) {
 
-  // Get query params
   const query = req.query;
 
-  // Convert them to subsquent mongoose query
+  // Convert query params to subsquent mongoose query
   const queryString = JSON.stringify(query);
   const newQ = queryString.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
   const queryObject = JSON.parse(newQ);
 
-  // Fetch products from DB
   const products = await Product.find(queryObject);
 
-  // Send success response with data
   const response = new Response({
     message: "Products fetched",
     data: products,
@@ -36,11 +31,8 @@ export async function getAllProducts(req, res) {
 
 export async function getAProduct(req, res) {
 
-  // Get product if from url parameter
   const id = req.params.id;
 
-
-  // Fetch product from db
   const product = await Product.findById(id);
 
   // If null gets returned, id was invalid
@@ -52,7 +44,6 @@ export async function getAProduct(req, res) {
     });
   }
   else {
-    // Else return requested data
     const response = new Response({ message: "Successfully fetched requested product", data: product });
     return res.json(response.raw)
   }
@@ -60,14 +51,8 @@ export async function getAProduct(req, res) {
 
 export async function addNewProduct(req, res) {
 
-  // Get data about product from body
-  const body = req.body;
-
-  // Make sure data is formatted properly
-  const d = Validations.ProductSchema.parse(body)
-
-  // Save the data
-  const product1 = new Product(d);
+  // Data is validated in middleware, just use that
+  const product1 = new Product(res.locals.validated);
   const data = await product1.save();
 
   const response = new Response({
@@ -75,21 +60,17 @@ export async function addNewProduct(req, res) {
     data: data,
   })
 
-  // Return response
   return res.json(response.raw);
 }
 
 export async function editAProduct(req, res) {
 
-  // Get product's id and body
-  const body = req.body;
   const id = req.params.id;
 
-  // Parse and fetch
-  const d = Validations.ProductEditSchema.parse(body);
-  const product = await Product.findByIdAndUpdate(id, d, { new: true });
+  // Data is validated in middleware, just use that
+  const product = await Product.findByIdAndUpdate(id, res.locals.validated, { new: true });
 
-  // If noting gets deleted
+  // If noting gets deleted, invalid product id
   if (!product) {
     return res.status(statusCode.BAD_REQUEST).json({
       success: false,
@@ -99,7 +80,6 @@ export async function editAProduct(req, res) {
   }
   else {
 
-    // Create and return response
     const response = new Response({
       message: "Successfully edited the product",
       data: product,
@@ -111,13 +91,11 @@ export async function editAProduct(req, res) {
 
 export async function deleteAProduct(req, res) {
 
-  // Get products id
   const id = req.params.id;
 
-  // Find product and remove
   const product = await Product.findByIdAndDelete(id);
 
-  // If noting gets deleted
+  // If noting gets deleted, invalid product id
   if (!product) {
     return res.status(statusCode.BAD_REQUEST).json({
       success: false,
@@ -128,7 +106,6 @@ export async function deleteAProduct(req, res) {
 
   else {
 
-    // Return success response
     const response = new Response({
       message: "Successfully removed requested product",
       data: product,
