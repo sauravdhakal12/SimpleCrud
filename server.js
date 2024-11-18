@@ -1,6 +1,6 @@
 import app from "./app.js"
-import { PORT } from "./utils/config.js";
+import config from "./utils/config.utils.js"
 
-app.listen(PORT || 4000, () => {
-  console.log(`Listining on port ${PORT || 4000}`);
+app.listen(config.PORT || 4000, () => {
+  console.log(`Listining on port ${config.PORT || 4000}`);
 })

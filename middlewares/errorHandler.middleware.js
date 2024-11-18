@@ -1,6 +1,6 @@
 import { MongooseError } from "mongoose";
 import { ZodError } from "zod";
-import statusCode from "../utils/statusCode.js";
+import statusCode from "../utils/statusCode.utils.js";
 
 export default function errorHandler(err, req, res, next) {
 
@@ -34,6 +34,8 @@ export default function errorHandler(err, req, res, next) {
         error: "Invalid format for product id",
       });
   }
+
+  console.log(err);
 
   return res.status(statusCode.INTERNAL_SERVER_ERROR).send({
     success: false,

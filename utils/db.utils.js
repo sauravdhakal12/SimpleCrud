@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-import { DB_URL } from "./config.js";
+import config from "./config.utils.js";
 
 export default async function connectDB() {
   try {
 
     // Connnect to db using URL from .env
-    const conn = await mongoose.connect(DB_URL);
+    const conn = await mongoose.connect(config.DB_URL);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
 
   } catch (error) {
